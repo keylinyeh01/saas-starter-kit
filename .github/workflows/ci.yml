@@ -1,0 +1,34 @@
+name: SaaS CI Pipeline
+
+# 觸發時機：當有代碼 push 到 main 分支時
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. 下載你的代碼
+    - uses: actions/checkout@v3
+
+    # 2. 啟動 Docker Compose (跟你在本機做的一樣！)
+    - name: Start containers
+      run: docker-compose up -d --build
+
+    # 3. 等待系統啟動 (給它 10 秒暖身)
+    - name: Wait for services
+      run: sleep 10
+
+    # 4. 執行測試 (用 curl 假裝是瀏覽器去訪問)
+    - name: Test Homepage
+      run: |
+        echo "Testing endpoint..."
+        # 訪問 localhost:3000，如果成功會回傳 200 OK
+        # 如果失敗，這個步驟會報錯，你會收到通知
+        curl --fail http://localhost:3000 || exit 1
+
+    # 5. 關閉並清理
+    - name: Stop containers
+      run: docker-compose down
