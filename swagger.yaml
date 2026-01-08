@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: SaaS Starter Kit API
+  version: 1.0.0
+  description: 這是 SaaS 多租戶系統的後端 API 規格書
+servers:
+  - url: http://localhost:3000
+    description: 本地開發環境
+
+paths:
+  /:
+    get:
+      summary: 訪問首頁 (測試多租戶與限流)
+      description: 這是主要的測試端點，會根據租戶 ID 進行計數與隔離。
+      parameters:
+        - in: query
+          name: tenant
+          schema:
+            type: string
+            default: google
+          description: 租戶名稱 (Tenant ID)，用來區分不同客戶的數據。
+      responses:
+        '200':
+          description: 成功訪問
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 歡迎光臨，google
+                  count:
+                    type: integer
+                    example: 5
+                  status:
+                    type: string
+                    example: 正常通行
+        '429':
+          description: 請求太頻繁 (Rate Limited)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 太頻繁了！
+                  message:
+                    type: string
+                    example: 親愛的 google，你說話太快了，請休息一下。

@@ -2,8 +2,18 @@ const express = require('express');
 const { Pool } = require('pg');
 const { createClient } = require('redis');
 
+// --- 新增這兩行 ---
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+// ----------------
+
 const app = express();
 const port = 3000;
+
+// --- 新增這兩行 (載入文檔) ---
+const swaggerDocument = YAML.load('./swagger.yaml');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// --------
 
 // 設定限制：每個租戶，每 10 秒鐘，只能訪問 5 次
 // (為了讓你方便測試，我設得很嚴格)

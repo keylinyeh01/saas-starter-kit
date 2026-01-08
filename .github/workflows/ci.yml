@@ -40,6 +40,16 @@ jobs:
         echo "Testing endpoint..."
         curl --fail http://localhost:3000 || exit 1
 
+    # 4. 測試 (更新版：加入文檔檢查)
+    - name: Test Endpoints
+      run: |
+        echo "Testing Homepage..."
+        curl --fail http://localhost:3000 || exit 1
+        
+        echo "Testing Documentation..."
+    # -L 代表自動跟隨轉址 (因為 /api-docs 有時會跳轉到 /api-docs/)
+        curl --fail -L http://localhost:3000/api-docs/ || exit 1
+
     # 7. 清理
     - name: Stop containers
       run: docker compose down
