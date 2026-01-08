@@ -34,14 +34,15 @@ jobs:
         docker compose ps
         docker compose logs
 
-    # 6. 測試 (更新版：加入文檔檢查)
+    # 6. 測試 (這裡修改了！加入文檔頁面測試)
     - name: Test Endpoints
       run: |
         echo "Testing Homepage..."
+        # 測試首頁
         curl --fail http://localhost:3000 || exit 1
         
         echo "Testing Documentation..."
-    # -L 代表自動跟隨轉址 (因為 /api-docs 有時會跳轉到 /api-docs/)
+        # 測試 Swagger 文檔 (加上 -L 是為了自動跟隨轉址)
         curl --fail -L http://localhost:3000/api-docs/ || exit 1
         
 
