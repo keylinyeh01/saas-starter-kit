@@ -43,7 +43,8 @@ jobs:
         
         echo "Testing Documentation..."
         # 測試 Swagger 文檔 (加上 -L 是為了自動跟隨轉址)
-        curl --fail -L http://localhost:3000/api-docs/ || exit 1
+        curl --fail -L http://localhost:3000/api-docs/ || exit 1 
+        
         
 
     # 7. 清理
