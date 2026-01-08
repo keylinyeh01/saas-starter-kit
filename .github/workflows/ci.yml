@@ -11,27 +11,35 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    # 1. 啟動
+    # 1. 啟動所有服務
     - name: Start containers
       run: docker compose up -d --build
 
-    # 2. 等待 (修正點：延長到 30 秒，確保 DB 完成初始化)
+    # 2. 等待 30 秒 (這時候資料庫正在慢慢初始化，App 可能會先崩潰，沒關係)
     - name: Wait for services
       run: sleep 30
 
-    # 3. 除錯用：印出目前容器的狀態與 Log
-    # 這樣如果失敗，我們點開 GitHub Log 就能看到是誰報錯
+    # 3. 【關鍵修正】重啟 App
+    # 因為資料庫現在應該好了，我們把剛剛撞牆死掉的 App 叫醒，叫它再連一次
+    - name: Restart Node App
+      run: docker compose restart app
+
+    # 4. 再等個 5 秒讓 App 連線
+    - name: Wait for App restart
+      run: sleep 5
+
+    # 5. 印出 Log (萬一又失敗，方便我們除錯)
     - name: Show logs
       run: |
         docker compose ps
         docker compose logs
 
-    # 4. 測試
+    # 6. 測試
     - name: Test Homepage
       run: |
         echo "Testing endpoint..."
         curl --fail http://localhost:3000 || exit 1
 
-    # 5. 清理
+    # 7. 清理
     - name: Stop containers
       run: docker compose down
