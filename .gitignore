@@ -1,2 +1,12 @@
-node_modules/
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
 .env
+
+# Mac
+.DS_Store
+
+# Data (不要備份向量資料庫，除非你想備份數據)
+chroma_db/

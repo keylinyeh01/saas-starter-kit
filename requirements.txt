@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+langchain
+langchain-community
+langchain-core
+langchain-openai
+langchain-huggingface
+sentence-transformers  
+langchain-postgres
+psycopg2-binary
+pgvector 
+python-dotenv
+pydantic
+httpx
+pytest
