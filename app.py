@@ -1,3 +1,4 @@
+# --- 修正後的 app.py 開頭 import 區 ---
 import os
 import json
 from datetime import datetime
@@ -6,16 +7,11 @@ import PyPDF2
 from docx import Document as DocxDocument
 from typing import List
 
-# 確保在任何工作目錄下都能穩定 import
-# 修正建議：直接 import 同目錄下的檔案
-try:
-    # 嘗試從 package 導入 (適用於某些 IDE 或測試環境)
-    from EnterpriseContractSentinel.retrieval import VectorStoreManager
-    from EnterpriseContractSentinel.generation import ContractAnalyst
-except ImportError:
-    # 回退到本地導入 (適用於直接執行 streamlit run app.py)
-    from retrieval import VectorStoreManager
-    from generation import ContractAnalyst
+# 因為檔案都在同一層了，直接這樣寫最穩：
+from retrieval import VectorStoreManager
+from generation import ContractAnalyst
+
+# ------------------------------------
 
 # --- 1. 核心工具：讀取與解析 ---
 
