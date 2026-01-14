@@ -64,7 +64,7 @@ class VectorStoreManager:
         for t in texts:
             self._docs.append(SimpleDocument(page_content=t))
 
-    def search(self, query, k=3):
+    def search(self, query, k=10):
         """
         語意檢索：根據 Query 找出最相關的 k 筆資料
         """

@@ -63,13 +63,25 @@ class ContractAnalyst:
         return sorted(set(re.findall(r"(\d+(?:\.\d+)?%)", text)))
 
     def _format_consultation_msg(self, thresholds: list[str]) -> str:
-        """Format a disambiguation message for ambiguous thresholds."""
+        """
+        Format a disambiguation message for ambiguous thresholds.
+        
+        IMPORTANT: This function uses NO hardcoded business scenarios. It dynamically
+        presents the extracted thresholds and asks the user to clarify, making it
+        suitable for global random companies and random documents.
+        """
+        # Sort thresholds numerically for better presentation
+        sorted_thresholds = sorted(thresholds, key=lambda x: float(x.strip('%')))
+        min_threshold = sorted_thresholds[0] if sorted_thresholds else thresholds[0]
+        max_threshold = sorted_thresholds[-1] if sorted_thresholds else thresholds[-1]
+        
         return (
             "📢 **潛在法律歧義偵測**\n\n"
             f"合約中存在多個門檻定義（{', '.join(thresholds)}）。\n"
-            "請確認您關注的情境，以利精確判斷風險：\n\n"
-            "1️⃣ **融資/股權變動**：通常對應較低門檻（如 30%）。\n"
-            "2️⃣ **經營權/授權**：通常對應較高門檻（如 50%）。"
+            "請確認您關注的具體情境，以利精確判斷風險：\n\n"
+            f"1️⃣ **較低門檻**：{min_threshold}（可能適用於特定情境）\n"
+            f"2️⃣ **較高門檻**：{max_threshold}（可能適用於其他情境）\n\n"
+            "建議：請參考合約原文中每個門檻對應的具體條款，以確定適用情境。"
         )
 
     def _normalize_inputs(self, a: str, b: str) -> Tuple[str, str]:

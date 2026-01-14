@@ -13,3 +13,15 @@ python-dotenv
 pydantic
 httpx
 pytest
+
+# Fine-Tuning dependencies
+transformers>=4.35.0
+peft>=0.7.0
+datasets>=2.14.0
+accelerate>=0.24.0
+bitsandbytes>=0.41.0  # For QLoRA quantization
+torch>=2.0.0
+
+# Multi-Agent dependencies
+crewai>=0.1.0  # Multi-agent framework
+pyautogen>=0.2.0  # Alternative multi-agent framework

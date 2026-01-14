@@ -87,14 +87,23 @@ def split_text_fallback(text: str, *, chunk_size: int, chunk_overlap: int) -> Li
 
 def extract_keyword_evidence(raw_text: str, query: str, *, max_snippets: int = 4) -> List[str]:
     """
-    Keyword-based evidence extraction (demo safety net).
-
+    Keyword-based evidence extraction (fallback safety net).
+    
+    IMPORTANT: This function uses NO hardcoded keywords. It dynamically extracts
+    keywords from the query itself, making it suitable for global random companies
+    and random documents.
+    
     This intentionally bypasses vector search to avoid "答非所問" when:
     - the vector index misses a clause
-    - the clause uses different wording (late payment / default interest)
+    - the clause uses different wording
+    
+    Strategy:
+    - Extract meaningful tokens from the query (words, numbers, CJK characters)
+    - Search for these tokens in the raw text
+    - Return paragraphs containing the most matches
     """
     text = (raw_text or "").strip()
-    q = (query or "").strip().lower()
+    q = (query or "").strip()
     if not text or not q:
         return []
 
@@ -104,40 +113,38 @@ def extract_keyword_evidence(raw_text: str, query: str, *, max_snippets: int = 4
     if len(paras) <= 1:
         paras = [p.strip() for p in text.split("\n") if p.strip()]
 
-    keywords: List[str] = []
-    if any(k in q for k in ["逾期", "晚付", "延遲", "滯納金", "罰", "利息", "違約"]):
-        keywords += [
-            "逾期",
-            "滯納金",
-            "利息",
-            "違約",
-            "罰",
-            "late payment",
-            "default interest",
-            "penalty",
-            "interest",
-            "prime",
-            "prime interest rate",
-            "royalty",
-            "terminate",
-            "termination",
-            "notice",
-            "cure",
-            "remedies",
-            "60 days",
-            "30 days",
-        ]
-    if any(k in q for k in ["付款", "支付", "匯款", "發票", "錢"]):
-        keywords += ["付款", "支付", "匯款", "發票", "net", "days", "day", "payment", "invoice"]
+    # DYNAMIC keyword extraction from query (NO hardcoded keywords)
+    # Extract all meaningful tokens from the query
+    import re
+    
+    # Extract words (alphanumeric sequences, including numbers and percentages)
+    query_words = set(re.findall(r'\b[a-z0-9%\-]+\b', q.lower()))
+    
+    # Extract CJK characters and bigrams
+    cjk_chars = re.findall(r'[\u4e00-\u9fff]', q)
+    for ch in cjk_chars:
+        query_words.add(ch)
+    # Add CJK bigrams for better matching
+    for i in range(len(cjk_chars) - 1):
+        query_words.add(cjk_chars[i] + cjk_chars[i + 1])
+    
+    # Extract numbers and percentages (e.g., "30%", "60 days", "1000")
+    numbers = re.findall(r'\d+(?:\.\d+)?%?', q)
+    for num in numbers:
+        query_words.add(num.lower())
+    
+    # Remove very short tokens (single characters, unless CJK)
+    keywords = {w for w in query_words if len(w) >= 2 or (len(w) == 1 and re.match(r'[\u4e00-\u9fff]', w))}
+    
+    if not keywords:
+        return []
 
-    # De-dup while keeping order
-    seen = set()
-    keywords = [k for k in keywords if not (k in seen or seen.add(k))]
-
+    # Score paragraphs by keyword matches
     scored: List[tuple[int, int]] = []
     for i, p in enumerate(paras):
         pl = p.lower()
-        score = sum(1 for k in keywords if k and k in pl)
+        # Count keyword matches (weight longer keywords more)
+        score = sum(2 if len(k) >= 2 else 1 for k in keywords if k in pl)
         if score > 0:
             scored.append((score, i))
 
